@@ -43,9 +43,9 @@ import java.sql.SQLException;
  */
 @RequiredArgsConstructor
 public final class SoftTransactionManager {
-
+	/** {@link ExecutorDataMap#dataMap} 柔性事务对象 key */
     private static final String TRANSACTION = "transaction";
-
+    /** {@link ExecutorDataMap#dataMap} 柔性事务配置 key */
     private static final String TRANSACTION_CONFIG = "transactionConfig";
 
     @Getter
