@@ -28,6 +28,7 @@ import java.util.List;
 public interface TransactionLogStorage {
     
     /**
+     * 存储事务日志
      * Save transaction log.
      * 
      * @param transactionLog transaction log
@@ -35,6 +36,7 @@ public interface TransactionLogStorage {
     void add(TransactionLog transactionLog);
     
     /**
+     * 根据主键删除事务日志
      * Remove transaction log.
      * 
      * @param id transaction log id
@@ -42,6 +44,12 @@ public interface TransactionLogStorage {
     void remove(String id);
     
     /**
+     * 读取需要处理的事务日志
+     * 
+     * <p>需要处理的事务日志为: </p>
+     * <p>1. 异步处理次数小于最大处理次数.</p>
+     * <p>2. 异步处理的事务日志早于异步处理的间隔时间.</p>
+     * 
      * Find eligible transaction logs.
      * 
      * <p>To be processed transaction logs: </p>
@@ -56,18 +64,20 @@ public interface TransactionLogStorage {
     List<TransactionLog> findEligibleTransactionLogs(int size, int maxDeliveryTryTimes, long maxDeliveryTryDelayMillis);
     
     /**
+     * 增加事务日志异步重试次数
      * Increase asynchronized delivery try times.
      * 
-     * @param id transaction log id
+     * @param id transaction log id 事务主键
      */
     void increaseAsyncDeliveryTryTimes(String id);
     
     /**
+     * 处理事务数据
      * Process transaction logs.
      *
-     * @param connection connection for business app
-     * @param transactionLog transaction log
-     * @param maxDeliveryTryTimes max delivery try times
+     * @param connection connection for business app     业务数据库连接
+     * @param transactionLog transaction log             事务日志
+     * @param maxDeliveryTryTimes max delivery try times 事务送达的最大尝试次数
      * @return process success or not
      */
     boolean processData(Connection connection, TransactionLog transactionLog, int maxDeliveryTryTimes);
