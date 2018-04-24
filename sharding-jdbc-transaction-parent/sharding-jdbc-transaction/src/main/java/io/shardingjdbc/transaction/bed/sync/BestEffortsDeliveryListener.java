@@ -46,22 +46,22 @@ public final class BestEffortsDeliveryListener {
     @Subscribe
     @AllowConcurrentEvents
     public void listen(final DMLExecutionEvent event) {
-        if (!isProcessContinuously()) {
+        if (!isProcessContinuously()) { // 方法判断是否处于最大努力送达型事务中，当且仅当处于该状态才进行监听事件处理
             return;
         }
         SoftTransactionConfiguration transactionConfig = SoftTransactionManager.getCurrentTransactionConfiguration().get();
         TransactionLogStorage transactionLogStorage = TransactionLogStorageFactory.createTransactionLogStorage(transactionConfig.buildTransactionLogDataSource());
         BEDSoftTransaction bedSoftTransaction = (BEDSoftTransaction) SoftTransactionManager.getCurrentTransaction().get();
         switch (event.getEventExecutionType()) {
-            case BEFORE_EXECUTE:
+            case BEFORE_EXECUTE: // 执行前，插入事务日志
                 //TODO for batch SQL need split to 2-level records
                 transactionLogStorage.add(new TransactionLog(event.getId(), bedSoftTransaction.getTransactionId(), bedSoftTransaction.getTransactionType(), 
                         event.getDataSource(), event.getSql(), event.getParameters(), System.currentTimeMillis(), 0));
                 return;
-            case EXECUTE_SUCCESS: 
+            case EXECUTE_SUCCESS: // 执行成功，移除事务日志
                 transactionLogStorage.remove(event.getId());
                 return;
-            case EXECUTE_FAILURE: 
+            case EXECUTE_FAILURE: // 执行失败，同步重试
                 boolean deliverySuccess = false;
                 for (int i = 0; i < transactionConfig.getSyncMaxDeliveryTryTimes(); i++) {
                     if (deliverySuccess) {
@@ -71,19 +71,23 @@ public final class BestEffortsDeliveryListener {
                     Connection conn = null;
                     PreparedStatement preparedStatement = null;
                     try {
+                    	// 获得数据库连接
                         conn = bedSoftTransaction.getConnection().getConnection(event.getDataSource(), SQLType.DML);
-                        if (!isValidConnection(conn)) {
+                        if (!isValidConnection(conn)) { // 因为可能执行失败是数据库连接异常，所以判断一次，如果无效，重新获取数据库连接
                             bedSoftTransaction.getConnection().release(conn);
                             conn = bedSoftTransaction.getConnection().getConnection(event.getDataSource(), SQLType.DML);
                             isNewConnection = true;
                         }
                         preparedStatement = conn.prepareStatement(event.getSql());
-                        //TODO for batch event need split to 2-level records
+                        // 同步重试
+                        //TODO for batch event need split to 2-level records 
+                        // 对于批量事件需要解析成两层列表
                         for (int parameterIndex = 0; parameterIndex < event.getParameters().size(); parameterIndex++) {
                             preparedStatement.setObject(parameterIndex + 1, event.getParameters().get(parameterIndex));
                         }
                         preparedStatement.executeUpdate();
                         deliverySuccess = true;
+                        // 同步重试成功，移除事务日志
                         transactionLogStorage.remove(event.getId());
                     } catch (final SQLException ex) {
                         log.error(String.format("Delivery times %s error, max try times is %s", i + 1, transactionConfig.getSyncMaxDeliveryTryTimes()), ex);

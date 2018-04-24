@@ -85,9 +85,10 @@ public final class SoftTransactionManager {
     }
     
     /**
+     * 创建柔性事务
      * Get B.A.S.E transaction.
      * 
-     * @param type transaction type
+     * @param type transaction type 柔性事务类型
      * @return B.A.S.E transaction
      */
     public AbstractSoftTransaction getTransaction(final SoftTransactionType type) {
@@ -102,7 +103,9 @@ public final class SoftTransactionManager {
             default: 
                 throw new UnsupportedOperationException(type.toString());
         }
+        
         // TODO don't support nested transaction, should configurable in future
+        // 目前使用不支持嵌套事务，以后这里需要可配置
         if (getCurrentTransaction().isPresent()) {
             throw new UnsupportedOperationException("Cannot support nested transaction.");
         }
@@ -112,6 +115,7 @@ public final class SoftTransactionManager {
     }
     
     /**
+     * 获取当前线程的柔性事务配置
      * Get transaction configuration from current thread.
      * 
      * @return transaction configuration from current thread
@@ -124,6 +128,7 @@ public final class SoftTransactionManager {
     }
     
     /**
+     * 获取当前的柔性事务
      * Get current transaction.
      * 
      * @return current transaction
