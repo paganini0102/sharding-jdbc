@@ -31,12 +31,19 @@ import java.util.Map;
  */
 public final class Dictionary {
     
+	/** 词法关键词Map */
     private final Map<String, Keyword> tokens = new HashMap<>(1024);
     
     public Dictionary(final Keyword... dialectKeywords) {
         fill(dialectKeywords);
     }
     
+    /**
+     * 装上默认词法关键词 + 方言词法关键词
+     * 不同的数据库有相同的默认词法关键词，有有不同的方言关键词
+     * 
+     * @param dialectKeywords 方言词法关键词
+     */
     private void fill(final Keyword... dialectKeywords) {
         for (DefaultKeyword each : DefaultKeyword.values()) {
             tokens.put(each.name(), each);
