@@ -144,6 +144,7 @@ public final class Tokenizer {
     }
     
     /**
+     * 扫描标识符
      * scan identifier.
      *
      * @return identifier token
@@ -164,6 +165,12 @@ public final class Tokenizer {
         return new Token(dictionary.findTokenType(literals, Literals.IDENTIFIER), literals, offset + length);
     }
     
+    /**
+     * 计算到结束字符的长度
+     * 
+     * @param terminatedChar 结束字符
+     * @return
+     */
     private int getLengthUntilTerminatedChar(final char terminatedChar) {
         int length = 1;
         while (terminatedChar != charAt(offset + length) || hasEscapeChar(terminatedChar, offset + length)) {
@@ -178,6 +185,13 @@ public final class Tokenizer {
         return length + 1;
     }
     
+    /**
+     * 是否是 Escape 字符
+     * 
+     * @param charIdentifier
+     * @param offset
+     * @return
+     */
     private boolean hasEscapeChar(final char charIdentifier, final int offset) {
         return charIdentifier == charAt(offset) && charIdentifier == charAt(offset + 1);
     }

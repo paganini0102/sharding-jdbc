@@ -19,6 +19,13 @@ package io.shardingjdbc.core.parsing.lexer.token;
 
 /**
  * Literals token.
+ * 
+ * <p>IDENTIFIER ：词法关键词</p>
+ * <p>VARIABLE ：变量</p>
+ * <p>CHARS ：字符串</p>
+ * <p>HEX ：十六进制</p>
+ * <p>INT ：整数</p>
+ * <p>FLOAT ：浮点数</p>
  *
  * @author zhangliang
  */
