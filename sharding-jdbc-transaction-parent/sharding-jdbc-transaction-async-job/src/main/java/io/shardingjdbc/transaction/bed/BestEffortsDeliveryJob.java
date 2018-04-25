@@ -37,10 +37,10 @@ import java.util.List;
  */
 @Slf4j
 public class BestEffortsDeliveryJob extends AbstractIndividualThroughputDataFlowElasticJob<TransactionLog> {
-    
+    /** 最大努力送达型异步作业配置对象 */
     @Setter
     private BestEffortsDeliveryConfiguration bedConfig;
-    
+    /** 事务日志存储器对象 */
     @Setter
     private TransactionLogStorage transactionLogStorage;
     

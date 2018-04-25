@@ -106,6 +106,12 @@ public final class BestEffortsDeliveryListener {
                 && SoftTransactionType.BestEffortsDelivery == SoftTransactionManager.getCurrentTransaction().get().getTransactionType();
     }
     
+    /**
+     * 通过 SELECT 1 校验数据库连接是否有效
+     * 
+     * @param conn 数据库连接
+     * @return
+     */
     private boolean isValidConnection(final Connection conn) {
         try (PreparedStatement preparedStatement = conn.prepareStatement("SELECT 1")) {
             try (ResultSet rs = preparedStatement.executeQuery()) {
@@ -116,6 +122,13 @@ public final class BestEffortsDeliveryListener {
         }
     }
     
+    /**
+     * 关闭释放预编译SQL对象和数据库连接
+     * 
+     * @param isNewConnection   是否新创建的数据库连接，是的情况下才释放
+     * @param conn              数据库连接
+     * @param preparedStatement 预编译SQL
+     */
     private void close(final boolean isNewConnection, final Connection conn, final PreparedStatement preparedStatement) {
         if (null != preparedStatement) {
             try {
