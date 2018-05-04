@@ -104,6 +104,13 @@ public class Lexer {
         return '/' == current && '/' == next || '-' == current && '-' == next || '/' == current && '*' == next;
     }
     
+    /**
+     * 是否是变量
+     * MySQL与 SQL Server支持
+     * 
+     * @see Tokenizer#scanVariable()
+     * @return
+     */
     protected boolean isVariableBegin() {
         return false;
     }
@@ -128,11 +135,21 @@ public class Lexer {
         return '0' == getCurrentChar(0) && 'x' == getCurrentChar(1);
     }
     
+    /**
+     * 是否是数字
+     * 
+     * @return
+     */
     private boolean isNumberBegin() {
         return CharType.isDigital(getCurrentChar(0)) || ('.' == getCurrentChar(0) && CharType.isDigital(getCurrentChar(1)) && !isIdentifierBegin(getCurrentChar(-1))
                 || ('-' == getCurrentChar(0) && ('.' == getCurrentChar(0) || CharType.isDigital(getCurrentChar(1)))));
     }
     
+    /**
+     * 是否是符号
+     * @see Tokenizer#scanSymbol()
+     * @return
+     */
     private boolean isSymbolBegin() {
         return CharType.isSymbol(getCurrentChar(0));
     }

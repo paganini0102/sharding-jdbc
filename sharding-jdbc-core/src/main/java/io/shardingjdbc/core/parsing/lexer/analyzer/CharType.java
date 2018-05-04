@@ -74,10 +74,11 @@ public final class CharType {
     }
     
     /**
+     * 判断是否为符号
      * Adjust is symbol or not.
      *
-     * @param ch to be adjusted char
-     * @return is symbol or not
+     * @param ch to be adjusted char 待判断的字符
+     * @return is symbol or not      是否为符号
      */
     public static boolean isSymbol(final char ch) {
         return '(' == ch || ')' == ch || '[' == ch || ']' == ch || '{' == ch || '}' == ch || '+' == ch || '-' == ch || '*' == ch || '/' == ch || '%' == ch || '^' == ch || '=' == ch
