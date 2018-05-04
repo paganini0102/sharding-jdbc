@@ -27,6 +27,7 @@ public final class ExpressionClauseParser implements SQLClauseParser {
     private final LexerEngine lexerEngine;
     
     /**
+     * 解析表达式
      * Parse expression.
      *
      * @param sqlStatement SQL statement
@@ -43,18 +44,19 @@ public final class ExpressionClauseParser implements SQLClauseParser {
     
     // TODO complete more expression parse
     private SQLExpression parseExpression(final SQLStatement sqlStatement) {
+    	// 解析表达式
         String literals = lexerEngine.getCurrentToken().getLiterals();
         final int beginPosition = lexerEngine.getCurrentToken().getEndPosition() - literals.length();
         final SQLExpression expression = getExpression(literals, sqlStatement);
         lexerEngine.nextToken();
-        if (lexerEngine.skipIfEqual(Symbol.DOT)) {
+        if (lexerEngine.skipIfEqual(Symbol.DOT)) { // 例如：ORDER BY o.uid 中的 "o.uid"
             String property = lexerEngine.getCurrentToken().getLiterals();
             lexerEngine.nextToken();
             return skipIfCompositeExpression(sqlStatement)
                     ? new SQLIgnoreExpression(lexerEngine.getInput().substring(beginPosition, lexerEngine.getCurrentToken().getEndPosition()))
                     : new SQLPropertyExpression(new SQLIdentifierExpression(literals), property);
         }
-        if (lexerEngine.equalAny(Symbol.LEFT_PAREN)) {
+        if (lexerEngine.equalAny(Symbol.LEFT_PAREN)) { // 例如：GROUP BY DATE(create_time)中的 "DATE(create_time)"
             lexerEngine.skipParentheses(sqlStatement);
             skipRestCompositeExpression(sqlStatement);
             return new SQLIgnoreExpression(lexerEngine.getInput().substring(beginPosition,
@@ -64,6 +66,12 @@ public final class ExpressionClauseParser implements SQLClauseParser {
                 ? new SQLIgnoreExpression(lexerEngine.getInput().substring(beginPosition, lexerEngine.getCurrentToken().getEndPosition())) : expression;
     }
     
+    /**
+     * 获得词法Token对应的SQLExpression
+     * @param literals     词法字面量标记
+     * @param sqlStatement
+     * @return
+     */
     private SQLExpression getExpression(final String literals, final SQLStatement sqlStatement) {
         if (lexerEngine.equalAny(Symbol.QUESTION)) {
             sqlStatement.increaseParametersIndex();
@@ -72,6 +80,7 @@ public final class ExpressionClauseParser implements SQLClauseParser {
         if (lexerEngine.equalAny(Literals.CHARS)) {
             return new SQLTextExpression(literals);
         }
+        // 考虑long的情况
         if (lexerEngine.equalAny(Literals.INT)) {
             return new SQLNumberExpression(NumberUtil.getExactlyNumber(literals, 10));
         }
@@ -87,6 +96,12 @@ public final class ExpressionClauseParser implements SQLClauseParser {
         return new SQLIgnoreExpression(literals);
     }
     
+    /**
+     * 如果是复合表达式跳过
+     * 
+     * @param sqlStatement 是否跳过
+     * @return
+     */
     private boolean skipIfCompositeExpression(final SQLStatement sqlStatement) {
         if (lexerEngine.equalAny(
                 Symbol.PLUS, Symbol.SUB, Symbol.STAR, Symbol.SLASH, Symbol.PERCENT, Symbol.AMP, Symbol.BAR, Symbol.DOUBLE_AMP, Symbol.DOUBLE_BAR, Symbol.CARET, Symbol.DOT, Symbol.LEFT_PAREN)) {
@@ -97,6 +112,11 @@ public final class ExpressionClauseParser implements SQLClauseParser {
         return false;
     }
     
+    /**
+     * 跳过剩余复合表达式
+     * 
+     * @param sqlStatement
+     */
     private void skipRestCompositeExpression(final SQLStatement sqlStatement) {
         while (lexerEngine.skipIfEqual(Symbol.PLUS, Symbol.SUB, Symbol.STAR, Symbol.SLASH, Symbol.PERCENT, Symbol.AMP, Symbol.BAR, Symbol.DOUBLE_AMP, Symbol.DOUBLE_BAR, Symbol.CARET, Symbol.DOT)) {
             if (lexerEngine.equalAny(Symbol.QUESTION)) {
