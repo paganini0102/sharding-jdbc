@@ -19,11 +19,13 @@ public final class AliasClauseParser implements SQLClauseParser {
     private final LexerEngine lexerEngine;
     
     /**
+     * 解析别名（字段、表）
      * Parse alias.
      *
      * @return alias
      */
     public Optional<String> parse() {
+    	// 解析带AS情况
         if (lexerEngine.skipIfEqual(DefaultKeyword.AS)) {
             if (lexerEngine.equalAny(Symbol.values())) {
                 return Optional.absent();
@@ -32,6 +34,7 @@ public final class AliasClauseParser implements SQLClauseParser {
             lexerEngine.nextToken();
             return Optional.of(result);
         }
+        // 解析别名
         if (lexerEngine.equalAny(
                 Literals.IDENTIFIER, Literals.CHARS, DefaultKeyword.USER, DefaultKeyword.END, DefaultKeyword.CASE, DefaultKeyword.KEY, DefaultKeyword.INTERVAL, DefaultKeyword.CONSTRAINT)) {
             String result = SQLUtil.getExactlyValue(lexerEngine.getCurrentToken().getLiterals());
