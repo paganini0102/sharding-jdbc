@@ -196,7 +196,11 @@ public abstract class AbstractSelectParser implements SQLParser {
         }
         return false;
     }
-    
+
+    /**
+     * 当无Order By条件时，使用Group By作为排序条件（数据库本身规则）
+     * @param selectStatement
+     */
     private void appendDerivedOrderBy(final SelectStatement selectStatement) {
         if (!selectStatement.getGroupByItems().isEmpty() && selectStatement.getOrderByItems().isEmpty()) {
             selectStatement.getOrderByItems().addAll(selectStatement.getGroupByItems());
