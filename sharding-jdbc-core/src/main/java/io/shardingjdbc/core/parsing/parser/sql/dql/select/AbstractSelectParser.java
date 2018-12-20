@@ -138,7 +138,12 @@ public abstract class AbstractSelectParser implements SQLParser {
             selectStatement.getSqlTokens().add(itemsToken);
         }
     }
-    
+
+    /**
+     * 针对AVG聚合字段，增加推导字段
+     * @param itemsToken
+     * @param selectStatement
+     */
     private void appendAvgDerivedColumns(final ItemsToken itemsToken, final SelectStatement selectStatement) {
         int derivedColumnOffset = 0;
         for (SelectItem each : selectStatement.getItems()) {
@@ -146,12 +151,16 @@ public abstract class AbstractSelectParser implements SQLParser {
                 continue;
             }
             AggregationSelectItem avgItem = (AggregationSelectItem) each;
+            // COUNT字段
             String countAlias = String.format(DERIVED_COUNT_ALIAS, derivedColumnOffset);
             AggregationSelectItem countItem = new AggregationSelectItem(AggregationType.COUNT, avgItem.getInnerExpression(), Optional.of(countAlias));
+            // SUM字段
             String sumAlias = String.format(DERIVED_SUM_ALIAS, derivedColumnOffset);
             AggregationSelectItem sumItem = new AggregationSelectItem(AggregationType.SUM, avgItem.getInnerExpression(), Optional.of(sumAlias));
+            // AggregationSelectItem设置
             avgItem.getDerivedAggregationSelectItems().add(countItem);
             avgItem.getDerivedAggregationSelectItems().add(sumItem);
+            // 将AVG列替换成常数，避免数据库再计算无用的AVG函数
             // TODO replace avg to constant, avoid calculate useless avg
             itemsToken.getItems().add(countItem.getExpression() + " AS " + countAlias + " ");
             itemsToken.getItems().add(sumItem.getExpression() + " AS " + sumAlias + " ");
