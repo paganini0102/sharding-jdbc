@@ -44,15 +44,15 @@ public final class MySQLSelectParser extends AbstractSelectParser {
     
     @Override
     protected void parseInternal(final SelectStatement selectStatement) {
-        parseDistinct();
+        parseDistinct(); // 解析DISTINCT、DISTINCTROW、UNION谓语
         parseSelectOption();
-        parseSelectList(selectStatement, getItems());
-        parseFrom(selectStatement);
-        parseWhere(getShardingRule(), selectStatement, getItems());
-        parseGroupBy(selectStatement);
-        parseHaving();
-        parseOrderBy(selectStatement);
-        parseLimit(selectStatement);
+        parseSelectList(selectStatement, getItems()); // 解析查询字段
+        parseFrom(selectStatement); // 解析表（JOIN ON/FROM单&多表）
+        parseWhere(getShardingRule(), selectStatement, getItems()); // 解析WHERE条件
+        parseGroupBy(selectStatement); // 解析Group By条件
+        parseHaving(); // 解析Having条件
+        parseOrderBy(selectStatement); // 解析Order By条件
+        parseLimit(selectStatement); // 解析分页Limit条件
         parseSelectRest();
     }
     
